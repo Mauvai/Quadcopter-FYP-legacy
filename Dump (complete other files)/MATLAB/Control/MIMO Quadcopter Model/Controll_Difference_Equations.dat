@@ -1,0 +1,20 @@
+ //Channel 1, u1 is Height
+// Channel 2, u2 is Roll
+// Channel 3, u3 is Pitch
+// Channel 4, u4 is Yaw
+
+//Motor 1 PWM input is summed +u1-u3+u4
+// Motor 2 PWM input summed +u1-u2-u4
+// Motor 3 PWM input is summed +u1+u3+u4
+// Motor 4 PWM input summed +u1+u2-u4 
+
+//Height Channel feeds are summed ++++
+// Roll Channel feeds are summed 0-0+
+// Pitch Channel Feeds are summed -0+0
+// Yaw channel feeds are summed +-+- 
+
+//The regulator controller with forward-Eulers general formula is:  
+// u(k)= K1*u(k-1)+ K2*r(k-1) + K3*r(k-1) + K4*x1hat(k-1) + K5*x1hat(k-1) + K6*x2hat(k-1) + K7*x3hat(k-1)
+
+//  The regulator controller with backwards-Eulers general formula is:  
+// u(k)= K1*r(k) + K2*v(k) + K3*x1hat(k) + K4*x2hat(k) + K5*x3hat(k)

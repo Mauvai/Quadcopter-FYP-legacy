@@ -1,0 +1,90 @@
+ //Channel 1, u1 is Height
+// Channel 2, u2 is Roll
+// Channel 3, u3 is Pitch
+// Channel 4, u4 is Yaw
+
+//Motor 1 PWM input is summed +u1-u3+u4
+// Motor 2 PWM input summed +u1-u2-u4
+// Motor 3 PWM input is summed +u1+u3+u4
+// Motor 4 PWM input summed +u1+u2-u4 
+
+//Height Channel feeds are summed ++++
+// Roll Channel feeds are summed 0-0+
+// Pitch Channel Feeds are summed -0+0
+// Yaw channel feeds are summed +-+- 
+
+//The regulator controller with forward-Eulers general formula is:  
+// u(k)= K1*u(k-1)+ K2*r(k-1) + K3*r(k-1) + K4*x1hat(k-1) + K5*x1hat(k-1) + K6*x2hat(k-1) + K7*x3hat(k-1)
+
+//  The regulator controller with backwards-Eulers general formula is:  
+// u(k)= K1*r(k) + K2*v(k) + K3*x1hat(k) + K4*x2hat(k) + K5*x3hat(k)
+ const float kh1 =   2.00000000;     const float kh2 =   1.00000000;     const float kh3 =  -2.39793427;     const float kh4 =  -0.65588425;   const float kh5 =  -0.59261116;
+ const float kr1 =   0.12500000;     const float kr2 =   1.00000000;     const float kr3 =  -1.02676834;     const float kr4 =  -0.23986889;   const float kr5 =  -0.65903255;
+ const float kp1 =   0.12500000;     const float kp2 =   1.00000000;     const float kp3 =  -1.02676834;     const float kp4 =  -0.23986889;   const float kp5 =  -0.65903255;
+ const float ky1 =   0.00000000;     const float ky2 =   1.00000000;     const float ky3 =  -0.37080064;     const float ky4 =  -0.45170301;   const float ky5 =  -0.11704666;
+
+// The output of the backwards-Eulers integrator is:  
+// v(k)= v(k-1) + KiTs*[r(k) - x1hat(k)]
+// This the where the clamping on the output should be applied
+
+ const float khi =   0.05856566;
+ const float kri =   0.05761465;
+ const float kpi =   0.05761465;
+ const float kyi =   0.00394348;
+
+//The regulator controller with Tustisn general formula is:  
+// u(k)= K1*u(k-1)+ K2*r(k) + K3*r(k-1) + K4*x1hat(k) + K5*x1hat(k-1) + K6*x2hat(k) + K7*x2hat(k-1) + K8*x3hat(k) + K9*x3hat(k-1)
+
+// Where
+ //Ki is the ith element of the controller matrix for a particular channel (Height, Roll, Pitch, Yaw)
+// r is the setpoint signal 
+// u is the channel signal 
+// x1hat is the position or angle estimate for that system 
+// x2hat is the rate of change of x1 estimate 
+// x3hat is the motor state estimate for a channel 
+
+//The controller gains for above controller with tustins method and no clamping is:  
+const float kh1 =   1.00000000;  const float kh2 =   1.94143434; const float kh3 =   -2.05856566; const float kh4 =    2.45649993; const float kh5 =   -2.33936861; const float kh6 =    0.65588425; const float kh7 =   -0.65588425; const float kh8 =    0.59261116; const float kh9 =   -0.59261116;
+const float kr1 =   1.00000000;  const float kr2 =   0.06738535; const float kr3 =   -0.18261465; const float kr4 =    1.08438299; const float kr5 =   -0.96915369; const float kr6 =    0.23986889; const float kr7 =   -0.23986889; const float kr8 =    0.65903255; const float kr9 =   -0.65903255;
+const float kp1 =   1.00000000;  const float kp2 =   0.06738535; const float kp3 =   -0.18261465; const float kp4 =    1.08438299; const float kp5 =   -0.96915369; const float kp6 =    0.23986889; const float kp7 =   -0.23986889; const float kp8 =    0.65903255; const float kp9 =   -0.65903255;
+const float ky1 =   1.00000000;  const float ky2 =  -0.00394348; const float ky3 =   -0.00394348; const float ky4 =    0.37474411; const float ky5 =   -0.36685716; const float ky6 =    0.45170301; const float ky7 =   -0.45170301; const float ky8 =    0.11704666; const float ky9 =   -0.11704666;
+
+
+// The states for each controller must be observed, this means there should be 4 sets of the 3 observer equations below
+
+// The observer general formula is:  
+ // x1hat(k+1)= F11*x1hat(k)+ F12*x2hat(k) + F13*x3hat(k) + G11*y1(k) + G12*y2(k) 
+// x2hat(k+1)= F21*x1hat(k)+ F22*x2hat(k) + F23*x3hat(k) + G21*y1(k) + G22*y2(k) 
+// x3hat(k+1)= F31*x1hat(k)+ F32*x2hat(k) + F33*x3hat(k) + G31*y1(k) + G32*y2(k) 
+
+// Where
+// x1hat is estimated x1 value for position/angle
+// x2hat is estimated x2 value for postion/angle rate
+// x3hat is estimated x3 value is the motor state
+// y1 is output of position/angle sensor 
+// y2 is output of rate sensor
+
+
+// The height observer gains are:  
+const float Fh11 =  -1.06012243;  const float Fh12 =   0.03000000; const float Fh13 =    0.00658443  const float Gh11 =    2.06012243; 
+const float Fh21 = -38.46697692;  const float Fh22 =   1.00000000; const float Fh23 =    0.40978132  const float Gh21 =   38.46697692; 
+const float Fh31 =  -9.37529529;  const float Fh32 =   0.00000000; const float Fh33 =    0.65143906  const float Gh31 =    9.37529529; 
+
+//The roll observer gains are:  
+const float Fr11 =   0.26612905;  const float Fr12 =  -0.00622157; const float Fr13 =    0.02059603  const float Gr11 =    0.73387095;  const float Gr12 =    0.03622157; 
+const float Fr21 =   0.07126057;  const float Fr22 =  -0.12257106; const float Fr23 =    1.28179111  const float Gr21 =   -0.07126057;  const float Gr22 =    1.12257106; 
+const float Fr31 =   0.02128054;  const float Fr32 =  -0.11676537; const float Fr33 =    0.65143906  const float Gr31 =   -0.02128054;  const float Gr32 =    0.11676537; 
+
+// The pitch observer gains are:  
+const float Fp11 =   0.26612905;  const float Fp12 =  -0.00622157; const float Fp13 =    0.02059603  const float Gp11 =    0.73387095;  const float Gp12 =    0.03622157; 
+const float Fp21 =   0.07126057;  const float Fp22 =  -0.12257106; const float Fp23 =    1.28179111  const float Gp21 =   -0.07126057;  const float Gp22 =    1.12257106; 
+const float Fp31 =   0.02128054;  const float Fp32 =  -0.11676537; const float Fp33 =    0.65143906  const float Gp31 =   -0.02128054;  const float Gp32 =    0.11676537; 
+
+// The yaw observer gains are:  
+const float Fy11 =   0.26612905;  const float Fy12 =  -0.00622157; const float Fy13 =    0.02059603  const float Gy11 =    0.19050553;  const float Gy12 =    0.02745124; 
+const float Fy21 =   0.07126057;  const float Fy22 =  -0.12257106; const float Fy23 =    1.28179111  const float Gy21 =   -0.00549183;  const float Gy22 =    0.03271282; 
+const float Fy31 =   0.02128054;  const float Fy32 =  -0.11676537; const float Fy33 =    0.65143906  const float Gy31 =    0.00913020;  const float Gy32 =    0.25971804; 
+
+// I believe the outputs will pass from sensor to Kalman then through observer. 
+// The observed states will then be used in controller. 
+// Controller Outputs will then be summed together

@@ -1,0 +1,70 @@
+// The sample time used in this design is   0.0200 seconds.
+// Channel 1, u1 is Height
+// Channel 2, u2 is Roll
+// Channel 3, u3 is Pitch
+// Channel 4, u4 is Yaw
+
+// Motor 1 PWM input is summed +u1-u3+u4
+// Motor 2 PWM input summed +u1-u2-u4
+// Motor 3 PWM input is summed +u1+u3+u4
+// Motor 4 PWM input summed +u1+u2-u4 
+
+// Height Channel feeds are summed ++++
+// Roll Channel feeds are summed 0-0+
+// Pitch Channel Feeds are summed -0+0
+// Yaw channel feeds are summed +-+- 
+
+//  The regulator controller with backwards-Eulers general formula is:  
+// u(k)= K1*r(k) + K2*v(k) + K3*x1hat(k) + K4*x2hat(k) + K5*x3hat(k)
+ fixed kh1 =   2.00000000;     fixed kh2 =   1.00000000;     fixed kh3 =  -2.48783180;     fixed kh4 =  -0.67321731;   fixed kh5 =  -0.60592245;
+ fixed kr1 =   0.12500000;     fixed kr2 =   1.00000000;     fixed kr3 =  -1.70465281;     fixed kr4 =  -0.33244746;   fixed kr5 =  -0.85195044;
+ fixed kp1 =   0.12500000;     fixed kp2 =   1.00000000;     fixed kp3 =  -1.70465281;     fixed kp4 =  -0.33244746;   fixed kp5 =  -0.85195044;
+ fixed ky1 =   0.00000000;     fixed ky2 =   1.00000000;     fixed ky3 =  -0.37262724;     fixed ky4 =  -0.45367895;   fixed ky5 =  -0.11754213;
+
+// The output of the backwards-Eulers integrator is:  
+// v(k)= v(k-1) + KiTs*[r(k) - x1hat(k)]
+// This the where the clamping on the output should be applied
+
+ fixed khi =   0.04085061;
+ fixed kri =   0.05555128;
+ fixed kpi =   0.05555128;
+ fixed kyi =   0.00265140;
+
+// The states for each controller must be observed, this means there should be 4 sets of the 3 observer equations below
+
+//The observer general formula is:  
+// x1hat(k+1)= F11*x1hat(k)+ F12*x2hat(k) + F13*x3hat(k) + G11*y1(k) + G12*y2(k) + B1*u(k)
+// x2hat(k+1)= F21*x1hat(k)+ F22*x2hat(k) + F23*x3hat(k) + G21*y1(k) + G22*y2(k) + B2*u(k)
+// x3hat(k+1)= F31*x1hat(k)+ F32*x2hat(k) + F33*x3hat(k) + G31*y1(k) + G32*y2(k) B3*u(k)
+
+// Where
+// x1hat is estimated x1 value for position/angle
+// x2hat is estimated x2 value for postion/angle rate
+// x3hat is estimated x3 value is the motor state
+// y1 is output of position/angle sensor 
+// y2 is output of rate sensor
+
+
+// The height observer gains are:  
+fixed Fh11 =  -0.74010653;  fixed Fh12 =   0.02000000; fixed Fh13 =    0.00306067;  fixed Gh11 =    1.74010653;  fixed Bh1 =    0.00029830;  
+fixed Fh21 = -42.14233391;  fixed Fh22 =   1.00000000; fixed Fh23 =    0.29217262;  fixed Gh21 =   42.14233391;  fixed Bh2 =    0.04372382; 
+fixed Fh31 = -13.98804501;  fixed Fh32 =   0.00000000; fixed Fh33 =    0.75147729;  fixed Gh31 =   13.98804501;  fixed Bh3 =    0.24852271; 
+
+// The roll observer gains are:  
+fixed Fr11 =   0.44058870;  fixed Fr12 =  -0.00325957; fixed Fr13 =    0.00957373;  fixed Gr11 =    0.55941130;  fixed Gr12 =    0.02325957; fixed Br1 =    0.00093307; 
+fixed Fr21 =   0.04789254;  fixed Fr22 =   0.12823289; fixed Fr23 =    0.91391248;  fixed Gr21 =   -0.04789254;  fixed Gr22 =    0.87176711; fixed Br2 =    0.13676758; 
+fixed Fr31 =   0.01612799;  fixed Fr32 =  -0.10614460; fixed Fr33 =    0.75147729;  fixed Gr31 =   -0.01612799;  fixed Gr32 =    0.10614460; fixed Br3 =    0.24852271; 
+
+// The pitch observer gains are:  
+fixed Fp11 =   0.44058870;  fixed Fp12 =  -0.00325957; fixed Fp13 =    0.00957373;  fixed Gp11 =    0.55941130;  fixed Gp12 =    0.02325957;  fixed Bp1 =    0.00093307; 
+fixed Fp21 =   0.04789254;  fixed Fp22 =   0.12823289; fixed Fp23 =    0.91391248;  fixed Gp21 =   -0.04789254;  fixed Gp22 =    0.87176711;  fixed Bp2 =    0.13676758; 
+fixed Fp31 =   0.01612799;  fixed Fp32 =  -0.10614460; fixed Fp33 =    0.75147729;  fixed Gp31 =   -0.01612799;  fixed Gp32 =    0.10614460;  fixed Bp3 =    0.24852271; 
+
+// The yaw observer gains are:  
+fixed Fy11 =   0.44058870;  fixed Fy12 =  -0.00325957; fixed Fy13 =    0.00957373;  fixed Gy11 =    0.12797052;  fixed Gy12 =    0.01872040; fixed By1 =    0.00007156; 
+fixed Fy21 =   0.00007156;  fixed Fy22 =   0.04789254; fixed Fy23 =    0.12823289;  fixed Gy21 =    0.91391248;  fixed Gy22 =   -0.00368433; fixed By2 =    0.00753193;
+fixed Fy31 =   0.01039855;  fixed Fy32 =   0.01039855; fixed Fy33 =    0.01612799;  fixed Gy31 =   -0.10614460;  fixed Gy32 =    0.75147729; fixed By3 =    0.00657218;
+
+// I believe the outputs will pass from sensor to Kalman then through observer. 
+// The observed states will then be used in controller. 
+// Controller Outputs will then be summed together

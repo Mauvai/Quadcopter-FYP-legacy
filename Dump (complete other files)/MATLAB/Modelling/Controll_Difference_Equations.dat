@@ -1,0 +1,17 @@
+ System 1 is Height
+ System 2 is Roll
+ System 3 is Pitch
+ System 4 is Yaw
+
+The controller general formula is:  
+ u(k)= K1*u(k-1)+ K2*r(k) + K3*r(k-1) + K4*x1(k) + K5*x(k-1) + K6*x2(k) + K7*x2(k-1) + K8*x3(k) + K9*x3(k-1)
+Where
+ Ki is the ith element of the controller matrix for a particular system (Height, Roll, Pitch, Yaw)
+ r is the setpoint signal 
+ u is the control signal 
+ x1 is the position or angle for that system 
+ x2 is the rate of change of x1 
+ x3 is the motor state for a system
+
+The controller gains are:  
+          k1           k2           k3           k4           k5           k6           k7           k8           k9
