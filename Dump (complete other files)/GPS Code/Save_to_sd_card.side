@@ -1,0 +1,10 @@
+Save_to_sd_card.c
+>compiler=C
+>memtype=cmm main ram compact
+>optimize=-Os
+>-m32bit-doubles
+>-fno-exceptions
+>-Dprintf=__simple_printf
+>defs::-std=c99
+>-lm
+>BOARD::ACTIVITYBOARD

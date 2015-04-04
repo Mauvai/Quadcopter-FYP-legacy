@@ -1,0 +1,9 @@
+gps_example_edited_by_cillian.c
+>compiler=C++
+>memtype=lmm main ram
+>optimize=-Os
+>-m32bit-doubles
+>-fno-exceptions
+>-enable_pruning
+>-fno-rtti
+>BOARD::ACTIVITYBOARD
