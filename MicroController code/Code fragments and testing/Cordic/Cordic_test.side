@@ -1,0 +1,15 @@
+Cordic_test.cpp
+cordic_radians.cpp
+fixed.cpp
+fixed_func.cpp
+efficient_math.h
+fixed.h
+fixed_func.h
+>compiler=C++
+>memtype=cmm main ram compact
+>optimize=-Os
+>-m32bit-doubles
+>-fno-exceptions
+>-fno-rtti
+>-ltiny
+>BOARD::ACTIVITYBOARD

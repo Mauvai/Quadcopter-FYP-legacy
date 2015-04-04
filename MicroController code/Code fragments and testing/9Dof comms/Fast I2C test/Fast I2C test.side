@@ -1,0 +1,16 @@
+Fast I2C test.cpp
+dof_class.h
+dof_class.cpp
+i2c_mod.h
+i2c_base_mod.h
+cordic_radians.cpp
+fast_square_root.cpp
+efficient_math.h
+>compiler=C++
+>memtype=cmm main ram compact
+>optimize=-Os
+>-m32bit-doubles
+>-fno-exceptions
+>-fno-rtti
+>-ltiny
+>BOARD::QUICKSTART

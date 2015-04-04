@@ -1,0 +1,13 @@
+ADF7024_test.cpp
+ADF7024.h
+ADF7024_config_registers.h
+ADF7024_defs.h
+>compiler=C++
+>memtype=cmm main ram compact
+>optimize=-Os
+>-m32bit-doubles
+>-fno-exceptions
+>-fno-rtti
+>-ltiny
+>-lm
+>BOARD::ACTIVITYBOARD
